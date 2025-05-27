@@ -70,21 +70,21 @@ class DeepTurboDecoder(nn.Module):
         # Final output layer to produce LLRs
         self.final_fc = nn.Linear(self.K, 1)
 
-    def forward(self, llr, inter_pattern):
-        batch_size, L, _ = llr.size()
+    def forward(self, llr_sz, inter_pattern):
+        batch_size, L, _ = llr_sz.size()
         inter_pattern_1 = inter_pattern.unsqueeze(-1)
         inter_pattern_k = inter_pattern.unsqueeze(-1).expand(batch_size, L, self.K)
 
         # y1: systematic bits (batch, L, 1)
         # y2: first parity bits (batch, L, 1)
         # y3: second parity bits (batch, L, 1)
-        y1 = llr[:, :, 0].unsqueeze(2)  # Systematic bits
-        y2 = llr[:, :, 1].unsqueeze(2)  # Parity bits from first encoder
-        y3 = llr[:, :, 2].unsqueeze(2)  # Parity bits from second encoder
+        y1 = llr_sz[:, :, 0].unsqueeze(2)  # Systematic bits
+        y2 = llr_sz[:, :, 1].unsqueeze(2)  # Parity bits from first encoder
+        y3 = llr_sz[:, :, 2].unsqueeze(2)  # Parity bits from second encoder
 
         # Initialize prior and final posterior
-        prior = torch.zeros(batch_size, L, self.K, device=llr.device)
-        final_posterior = torch.zeros(batch_size, L, self.K, device=llr.device)
+        prior = torch.zeros(batch_size, L, self.K, device=llr_sz.device)
+        final_posterior = torch.zeros(batch_size, L, self.K, device=llr_sz.device)
 
         # Main loop
         for it in range(self.num_iterations):
@@ -108,6 +108,6 @@ class DeepTurboDecoder(nn.Module):
                 final_posterior.scatter_(dim=1, index=inter_pattern_k, src=posterior2)
 
         # Final posterior to LLR
-        llr = self.final_fc(final_posterior).squeeze(-1)  # (batch, L)
+        llr_c = self.final_fc(final_posterior).squeeze(-1)  # (batch, L)
 
-        return llr
+        return llr_c
