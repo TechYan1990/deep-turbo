@@ -1,3 +1,7 @@
+import torch
+import torch.nn as nn
+
+
 # Y. Jiang, S. Kannan, H. Kim, S. Oh, H. Asnani, and P. Viswanath, “DEEPTURBO: Deep Turbo Decoder,”
 # in 2019 IEEE 20th International Workshop on Signal Processing Advances in Wireless Communications (SPAWC), 2019, pp. 1–5.
 class DeepTurboSISO(nn.Module):
